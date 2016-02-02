@@ -1,0 +1,9 @@
+<'mask'='http://www.icfi.com/aem/contentmask/1.0'>
+
+[mask:Config] > mix:referenceable
+  mixin
+  - mask:dataPath (path)
+
+[mask:NamedConfig] > mask:Config
+  mixin
+  - mask:name (name) mandatory
