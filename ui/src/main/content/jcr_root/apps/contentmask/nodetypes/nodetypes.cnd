@@ -7,3 +7,6 @@
 [mask:NamedConfig] > mask:Config
   mixin
   - mask:name (name) mandatory
+
+[mask:StorageRoot] > nt:unstructured
+  - mask:initializeLiveCopy (boolean)

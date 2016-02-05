@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspaceFilter version="1.0">
     <filter root="/apps/contentmask" />
+    <filter root="/etc/clientlibs/contentmask" />
+    <filter root="/oak:index/maskTypes"/>
     <filter root="/oak:index/maskConfig"/>
     <filter root="/oak:index/maskNamedConfig"/>
 </workspaceFilter>
