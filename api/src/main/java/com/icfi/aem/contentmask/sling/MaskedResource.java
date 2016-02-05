@@ -24,4 +24,6 @@ public interface MaskedResource extends Resource {
     Resource getStorage();
 
     MaskingValueMap getValueMap();
+
+    void revert();
 }

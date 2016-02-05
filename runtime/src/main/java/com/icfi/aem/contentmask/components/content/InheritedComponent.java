@@ -16,7 +16,8 @@ import org.apache.sling.models.annotations.Model;
     disableTargeting = true, listeners = @Listener(name = "afteredit", value = "REFRESH_PAGE"),
     templatePath = "/apps/contentmask/components/content/inheritedcomponent/cq:template", actionConfigs = {
         @ActionConfig(text = "Set Target", handler = "contentmask.inheritedcomponent.setTarget"),
-        @ActionConfig(text = "Edit", handler = "contentmask.inheritedcomponent.editInherited"),
+    @ActionConfig(text = "Edit", handler = "contentmask.inheritedcomponent.editInherited"),
+    @ActionConfig(text = "Revert Changes", handler = "contentmask.inheritedcomponent.revert")
 })
 @Model(adaptables = { Resource.class, SlingHttpServletRequest.class })
 public class InheritedComponent {

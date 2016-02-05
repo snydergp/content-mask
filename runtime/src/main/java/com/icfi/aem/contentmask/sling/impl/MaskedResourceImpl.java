@@ -1,8 +1,8 @@
 package com.icfi.aem.contentmask.sling.impl;
 
 import com.icfi.aem.contentmask.constants.JcrNames;
-import com.icfi.aem.contentmask.runtime.constants.JcrProperties;
 import com.icfi.aem.contentmask.domain.MaskConfig;
+import com.icfi.aem.contentmask.runtime.constants.JcrProperties;
 import com.icfi.aem.contentmask.sling.MaskedResource;
 import com.icfi.aem.contentmask.sling.MaskingValueMap;
 import org.apache.sling.api.resource.AbstractResource;
@@ -129,6 +129,24 @@ public class MaskedResourceImpl extends AbstractResource implements MaskedResour
             cache = new MaskingValueMapImpl();
         }
         return cache;
+    }
+
+    @Override
+    public void revert() {
+        if (!ResourceUtil.isNonExistingResource(storage)) {
+            try {
+                for (Resource child: storage.getChildren()) {
+                    storage.getResourceResolver().delete(child);
+                }
+                boolean initializeLiveCopy = getValueMap().get(JcrProperties.INITIALIZE_LIVE_COPY, Boolean.FALSE);
+                getValueMap().clear();
+                if (initializeLiveCopy) {
+                    getValueMap().put(JcrProperties.INITIALIZE_LIVE_COPY, Boolean.TRUE);
+                }
+            } catch (PersistenceException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -303,7 +321,7 @@ public class MaskedResourceImpl extends AbstractResource implements MaskedResour
         public Object remove(Object key) {
             initWrite();
             //setHidden(String.valueOf(key), true);  // TODO is this the desired behavior?  Without this, removing a
-                                                     //  property will result in the underlying data version appearing.
+            //  property will result in the underlying data version appearing.
             return storageWrite.remove(key);
         }
 
@@ -316,9 +334,11 @@ public class MaskedResourceImpl extends AbstractResource implements MaskedResour
         @Override
         public void clear() {
             initWrite();
-            storageWrite.clear();
             for (String key: keySet()) {
-                setHidden(key, true);
+                // TODO might be preferable to try dropping down to Node API and removing all non-protected props
+                if (!key.equals("jcr:primaryType") && !key.equals("jcr:mixinTypes")) {
+                    remove(key);
+                }
             }
         }
 

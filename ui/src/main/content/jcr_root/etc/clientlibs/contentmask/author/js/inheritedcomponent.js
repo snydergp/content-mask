@@ -11,6 +11,18 @@ contentmask.inheritedcomponent = {
         CQ.wcm.EditBase.showDialog(editable, CQ.wcm.EditBase.EDIT);
     },
 
+    revert : function() {
+        var targetPath = CQ.WCM.getNestedEditables(this.path)[0];
+        var data = {
+            ":operation": "revert-mask"
+        };
+        $.ajax(targetPath, {
+            'data': data,
+            'method': 'POST',
+            'success': function() {location.reload()}
+        });
+    },
+
     hideInheritedEditables : function() {
         $('.js-inherited-component').each(function(index, e) {
             var targetPath = $(e).attr('data-inherited-component');
