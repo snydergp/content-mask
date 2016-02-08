@@ -1,0 +1,1 @@
+var contentmask = window.contentmask || {};

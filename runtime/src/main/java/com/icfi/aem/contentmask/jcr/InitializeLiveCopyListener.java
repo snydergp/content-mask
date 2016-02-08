@@ -64,7 +64,7 @@ public class InitializeLiveCopyListener implements EventListener {
             session.getWorkspace().getObservationManager().addEventListener(
                 this,
                 EVENTS,
-                "/",
+                "/content",
                 true,
                 null,
                 new String[]{ NodeTypes.STORAGE_ROOT },
