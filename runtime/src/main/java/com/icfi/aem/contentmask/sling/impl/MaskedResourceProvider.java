@@ -4,6 +4,7 @@ import com.icfi.aem.contentmask.domain.MaskConfig;
 import com.icfi.aem.contentmask.provider.MaskConfigProvider;
 import com.icfi.aem.contentmask.sling.MaskedResource;
 import com.icfi.aem.contentmask.runtime.util.PathUtil;
+import com.icfi.aem.contentmask.util.MaskUtil;
 import org.apache.sling.api.resource.ModifyingResourceProvider;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -40,14 +41,18 @@ public class MaskedResourceProvider implements ResourceProvider, ModifyingResour
         String resolvedPath = data.getResourceMetadata().getResolutionPath();
         if (!ResourceUtil.isNonExistingResource(data) && !dataPath.equals(resolvedPath)) {
             // The delegated resource provider has found a match at a different path (e.g., "/a/b/c.selector.extension"
-            // was resolved to "a/b/c"). Force the resolve to retry.
+            // was resolved to "a/b/c"). Force retry of resolution.
             return null;
         }
-        String contentPath = PathUtil.getContentPath(path, config);
-        Resource content = resolver.resolve(contentPath);
+        String storagePath = PathUtil.getContentPath(path, config);
+        Resource content = resolver.resolve(storagePath);
         resolvedPath = content.getResourceMetadata().getResolutionPath();
-        if (!ResourceUtil.isNonExistingResource(content) && !contentPath.equals(resolvedPath)) {
+        if (!ResourceUtil.isNonExistingResource(content) && !storagePath.equals(resolvedPath)) {
             // See comment above
+            return null;
+        }
+        if (MaskUtil.isDeleted(content, config.getStoragePath())) {
+            // The storage path was resolved successfully, but it marks the merged resource for deletion
             return null;
         }
         return new MaskedResourceImpl(config, PathUtil.getRelativePath(path, config), data, content);
