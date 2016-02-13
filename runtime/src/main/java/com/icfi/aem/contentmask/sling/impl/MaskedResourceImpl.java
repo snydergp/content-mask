@@ -18,6 +18,8 @@ import org.apache.sling.api.wrappers.ModifiableValueMapDecorator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -268,6 +270,26 @@ public class MaskedResourceImpl extends AbstractResource implements MaskedResour
         }
 
         @Override
+        public Object getData(String key) {
+            return data.get(key);
+        }
+
+        @Override
+        public Object getStorage(String key) {
+            return storageRead.get(key);
+        }
+
+        @Override
+        public <T> T getData(String key, Class<T> tClass) {
+            return data.get(key, tClass);
+        }
+
+        @Override
+        public <T> T getStorage(String key, Class<T> tClass) {
+            return storageRead.get(key, tClass);
+        }
+
+        @Override
         public <T> T get(String name, Class<T> type) {
             if (storageRead.containsKey(name)) {
                 return storageRead.get(name, type);
@@ -320,9 +342,19 @@ public class MaskedResourceImpl extends AbstractResource implements MaskedResour
         @Override
         public Object remove(Object key) {
             initWrite();
-            //setHidden(String.valueOf(key), true);  // TODO is this the desired behavior?  Without this, removing a
-            //  property will result in the underlying data version appearing.
-            return storageWrite.remove(key);
+            String k = String.valueOf(key);
+            Node node = storage.adaptTo(Node.class);
+            try {
+                if (node != null && node.hasProperty(String.valueOf(key))) {
+                    if (!node.getProperty(k).getDefinition().isProtected()) {
+                        setHidden(String.valueOf(key), true);
+                        return storageWrite.remove(key);
+                    }
+                }
+            } catch (RepositoryException e) {
+                LOG.error("Error checking property protection state", e);
+            }
+            return null;
         }
 
         @Override
@@ -335,10 +367,7 @@ public class MaskedResourceImpl extends AbstractResource implements MaskedResour
         public void clear() {
             initWrite();
             for (String key: keySet()) {
-                // TODO might be preferable to try dropping down to Node API and removing all non-protected props
-                if (!key.equals("jcr:primaryType") && !key.equals("jcr:mixinTypes")) {
-                    remove(key);
-                }
+                remove(key);
             }
         }
 

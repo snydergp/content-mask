@@ -9,6 +9,7 @@ public final class JcrProperties {
     public static final String INITIALIZE_LIVE_COPY = JcrNames.NS + "initializeLiveCopy";
 
     public static final String JCR_PRIMARY_TYPE = "jcr:primaryType";
+    public static final String JCR_MIXIN_TYPES = "jcr:mixinTypes";
     public static final String JCR_UUID = "jcr:uuid";
 
     private JcrProperties() { }

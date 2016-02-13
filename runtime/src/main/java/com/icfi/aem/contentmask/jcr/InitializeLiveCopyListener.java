@@ -16,20 +16,23 @@ import javax.jcr.Session;
 import javax.jcr.observation.Event;
 import javax.jcr.observation.EventIterator;
 import javax.jcr.observation.EventListener;
+import javax.jcr.observation.ObservationManager;
 
 @Component(immediate = true)
 @Service
 public class InitializeLiveCopyListener implements EventListener {
 
-    private static final int EVENTS = Event.NODE_ADDED| Event.PROPERTY_ADDED | Event.PROPERTY_CHANGED;
+    private static final int EVENTS = Event.NODE_ADDED | Event.PROPERTY_ADDED | Event.PROPERTY_CHANGED;
 
     @Reference
     private SlingRepository repository;
 
+    private Session session;
+    private ObservationManager observationManager;
+
     @Override
     public void onEvent(EventIterator events) {
         try {
-            Session session = repository.loginAdministrative(null);
             while (events.hasNext()) {
                 Event event = events.nextEvent();
 
@@ -60,8 +63,9 @@ public class InitializeLiveCopyListener implements EventListener {
     @Activate
     protected void activate() {
         try {
-            Session session = repository.loginAdministrative(null);
-            session.getWorkspace().getObservationManager().addEventListener(
+            session = repository.loginAdministrative(null);
+            observationManager = session.getWorkspace().getObservationManager();
+            observationManager.addEventListener(
                 this,
                 EVENTS,
                 "/content",
@@ -78,8 +82,13 @@ public class InitializeLiveCopyListener implements EventListener {
     @Deactivate
     protected void deactivate() {
         try {
-            Session session = repository.loginAdministrative(null);
-            session.getWorkspace().getObservationManager().removeEventListener(this);
+            if(observationManager != null) {
+                observationManager.removeEventListener(this);
+            }
+            if (session != null) {
+                session.logout();
+                session = null;
+            }
         } catch (RepositoryException e) {
             e.printStackTrace();
         }

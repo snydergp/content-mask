@@ -49,5 +49,12 @@ public interface MaskingValueMap extends ValueMap {
      */
     void setHiddenChild(String name, boolean hidden);
 
+    Object getData(String key);
+
+    Object getStorage(String key);
+
+    <T> T getData(String key, Class<T> tClass);
+
+    <T> T getStorage(String key, Class<T> tClass);
 
 }
